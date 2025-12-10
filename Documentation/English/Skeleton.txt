@@ -1,4 +1,4 @@
-;
+﻿;
 ;     Skeleton library documentation
 ;
 ;      (c) 2024 - Fantaisie Software
@@ -14,6 +14,8 @@
   @@InitEngine3D must be called successfully before using the Skeleton functions.
 
 @CommandList
+
+@ExampleFile All Skeleton.pb
 
 @SupportedOS
 

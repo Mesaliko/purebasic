@@ -81,6 +81,7 @@ DataSection
   Data$ "EndDataSection"    , "", ""
   Data$ "EndDeclareModule"  , "", ""
   Data$ "EndEnumeration"    , "", ""
+  Data$ "EndHeaderSection"        , "", ""
   Data$ "EndIf"             , "", ""
   Data$ "EndImport"         , "", ""
   Data$ "EndInterface"      , "", ""
@@ -109,6 +110,8 @@ DataSection
     Data$ "Gosub" , "", " "
     Data$ "Goto"  , "", " "
   CompilerEndIf
+  
+  Data$ "HeaderSection"        , "EndHeaderSection", ""
 
   Data$ "If"            , "EndIf", " "
   Data$ "Import"        , "EndImport", " "

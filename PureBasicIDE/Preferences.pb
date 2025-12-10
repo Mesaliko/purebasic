@@ -226,8 +226,9 @@ Procedure LoadPreferences()
   EnableFolding    = ReadPreferenceLong("EnableFolding",  1)
   
   ; default
-  NbFoldStartWords = 10
-  NbFoldEndWords = 7
+  
+  NbFoldStartWords = 11
+  NbFoldEndWords = 8
   FoldStart$(1) = ";{"
   FoldStart$(2) = "Macro"
   FoldStart$(3) = "Procedure"
@@ -242,6 +243,7 @@ Procedure LoadPreferences()
   CompilerElse 
     FoldStart$(10) = "EnableASM" 
   CompilerEndIf
+  FoldStart$(11) = "HeaderSection" 
   
   FoldEnd$(1) = ";}"
   FoldEnd$(2) = "EndMacro"
@@ -254,6 +256,7 @@ Procedure LoadPreferences()
   CompilerElse 
     FoldEnd$(7) = "DisableASM"
   CompilerEndIf
+  FoldEnd$(8) = "EndHeaderSection"
   
   NbFoldStartWords = ReadPreferenceLong("StartWords", NbFoldStartWords)
   NbFoldEndWords = ReadPreferenceLong("EndWords", NbFoldEndWords)
@@ -330,7 +333,7 @@ Procedure LoadPreferences()
   EndIf
   
   If PrefsVersion < 520
-    ; CompilerElseIf added in 5.10
+    ; CompilerElseIf added in 5.20
     ReDim IndentKeywords.IndentEntry(NbIndentKeywords+4)
     
     IndentKeywords(NbIndentKeywords)\Keyword$ = "DeclareModule"
@@ -363,6 +366,24 @@ Procedure LoadPreferences()
     NbIndentKeywords+1
   EndIf
   
+  CompilerIf #SpiderBasic
+    If PrefsVersion < 621
+  CompilerElse
+    If PrefsVersion < 630
+  CompilerEndIf
+    ReDim IndentKeywords.IndentEntry(NbIndentKeywords+2)
+    
+    IndentKeywords(NbIndentKeywords)\Keyword$ = "HeaderSection"
+    IndentKeywords(NbIndentKeywords)\Before = 0
+    IndentKeywords(NbIndentKeywords)\After  = 1
+    NbIndentKeywords+1
+    
+    IndentKeywords(NbIndentKeywords)\Keyword$ = "EndHeaderSection"
+    IndentKeywords(NbIndentKeywords)\Before = -1
+    IndentKeywords(NbIndentKeywords)\After  = 0
+    NbIndentKeywords+1
+  EndIf
+    
   ; Sort and index the values
   BuildIndentVT()
   
@@ -3264,7 +3285,7 @@ Procedure OpenPreferencesWindow()
     DisableGadget(#GADGET_Preferences_SharedUCRT, 1)
   CompilerEndIf
   
-   CompilerIf Not #CompileLinux
+   CompilerIf Not #CompileLinux And Not #SpiderBasic
     DisableGadget(#GADGET_Preferences_Wayland, 1)
   CompilerEndIf
   
@@ -4952,7 +4973,18 @@ Procedure PreferencesWindowEvents(EventID)
         index = GetGadgetState(#GADGET_Preferences_ShortcutList)
         If index >= 0
           If IsShortcutUsed(Shortcut, index, 0)
-            MessageRequester(#ProductName$, Language("Shortcuts","AllreadyUsed")+#NewLine+Chr(34)+GetShortcutOwner(Shortcut)+Chr(34), #FLAG_Info) ; DO NOT FIX TYPO: AllreadyUsed
+            ; Shortcut is already used... ask if user would like to reassign it now
+            Text$ = Language("Shortcuts","AllreadyUsed")+#NewLine+Chr(34)+GetShortcutOwner(Shortcut)+Chr(34)+#NewLine+#NewLine+Language("Shortcuts","ReassignPrompt")
+            If MessageRequester(#ProductName$, Text$, #FLAG_Question | #PB_MessageRequester_YesNo) = #PB_MessageRequester_Yes ; DO NOT FIX TYPO: AllreadyUsed
+              For i = 0 To #MENU_LastShortcutItem
+                If Prefs_KeyboardShortcuts(i) = Shortcut
+                  Prefs_KeyboardShortcuts(i) = 0
+                  SetGadgetItemText(#GADGET_Preferences_ShortcutList, i, "", 1)
+                EndIf
+              Next i
+              Prefs_KeyboardShortcuts(index) = Shortcut ; must be before the SetText for OSX (see ShortcutManagement.pb)
+              SetGadgetItemText(#GADGET_Preferences_ShortcutList, index, GetShortcutText(Shortcut), 1)
+            EndIf
           Else
             Prefs_KeyboardShortcuts(index) = Shortcut ; must be before the SetText for OSX (see ShortcutManagement.pb)
             SetGadgetItemText(#GADGET_Preferences_ShortcutList, index, GetShortcutText(Shortcut), 1)

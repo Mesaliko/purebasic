@@ -90,26 +90,6 @@ IncludeFile "../Common.pb"
 #PB_ToolBar_Normal = 0
 #PB_ToolBar_Toggle = 1
 
-; Requester
-;
-#PB_MessageRequester_Ok          = 0
-#PB_MessageRequester_YesNo       = 1 << 0
-#PB_MessageRequester_YesNoCancel = 1 << 1
-#PB_MessageRequester_Info        = 1 << 2
-#PB_MessageRequester_Error       = 1 << 3
-#PB_MessageRequester_Warning     = 1 << 4
-
-; MessageRequester return value
-#PB_MessageRequester_Yes    = 6
-#PB_MessageRequester_No     = 7
-#PB_MessageRequester_Cancel = 2
-
-#PB_Requester_MultiSelection = 1
-
-#PB_InputRequester_Password = 1
-
-#PB_FontRequester_Effects = 1
-
 ; RunProgram
 ;
 #PB_Program_Wait     = 1
@@ -130,6 +110,10 @@ IncludeFile "../Common.pb"
 #PB_Menu_Preferences = -2
 #PB_Menu_About = -3
 #PB_Menu_Quit = -4
+#PB_Menu_Services = -5
+#PB_Menu_Hide = -6
+#PB_Menu_HideOthers = -7
+#PB_Menu_ShowAll = -8
 
 
 ; StatusBar
@@ -181,42 +165,6 @@ IncludeFile "../Common.pb"
 #PB_Date_Maximum  = 2
 #PB_Date_CheckBox = $2 ;DTS_SHOWNONE
 
-; Common Flags for all Explorer[...]Gadgets:
-#PB_Explorer_NoMyDocuments       = 1 << 0
-
-; Flags for ExplorerTreeGadget and ExplorerViewGadget:
-#PB_Explorer_NoFiles             = 1 << 1
-#PB_Explorer_NoDriveRequester    = 1 << 2
-#PB_Explorer_AutoSort            = 1 << 3
-#PB_Explorer_BorderLess          = 1 << 4
-#PB_Explorer_AlwaysShowSelection = 1 << 5
-
-; ExplorerList only Flags:
-#PB_Explorer_NoParentFolder      = 1 << 6
-#PB_Explorer_NoFolders           = 1 << 7
-#PB_Explorer_NoDirectoryChange   = 1 << 8
-#PB_Explorer_NoSort              = 1 << 9
-#PB_Explorer_MultiSelect         = 1 << 10
-#PB_Explorer_GridLines           = 1 << 11
-#PB_Explorer_HeaderDragDrop      = 1 << 12
-#PB_Explorer_FullRowSelect       = 1 << 13
-
-; ExplorerTree only Flags:
-#PB_Explorer_NoLines             = 1 << 14
-#PB_Explorer_NoButtons           = 1 << 15
-
-; ExplorerCombo only Flags:
-#PB_Explorer_DrivesOnly          = 1 << 16
-#PB_Explorer_Editable            = 1 << 17
-
-; Common Flags for all Explorer[...]Gadgets:
-#PB_Explorer_HiddenFiles         = 1 << 18
-
-; Return values for Explorer:
-#PB_Explorer_File             = 1
-#PB_Explorer_Directory        = 2
-#PB_Explorer_Selected         = 4
-
 ; Explorerlist standart columns:
 #PB_Explorer_Name                = "PB_Explorer_Column_Name"
 #PB_Explorer_Size                = "PB_Explorer_Column_Size"
@@ -226,20 +174,8 @@ IncludeFile "../Common.pb"
 #PB_Explorer_Modified            = "PB_Explorer_Column_Modified"
 #PB_Explorer_Accessed            = "PB_Explorer_Column_Accessed"
 
-#PB_Explorer_ColumnWidth = 1 << 19
-
-
 #PB_Image_Border = 1 << 0
 #PB_Image_Raised = 1 << 1
-
-
-#PB_ListIcon_AlwaysShowSelection = 0 ; NOT SUPPORTED
-#PB_ListIcon_FullRowSelect = 0       ; NOT SUPPORTED
-#PB_ListIcon_MultiSelect = 1
-#PB_ListIcon_CheckBoxes = 2
-#PB_ListIcon_ThreeState = 8
-#PB_ListIcon_GridLines = 16
-#PB_ListIcon_HeaderDragDrop = 32
 
 #PB_ListView_MultiSelect = 1
 #PB_ListView_ClickSelect = 2 ; NOT SUPPORTED
@@ -272,13 +208,6 @@ IncludeFile "../Common.pb"
 
 #PB_Editor_ReadOnly = 1
 #PB_Editor_WordWrap = 2
-
-#PB_String_BorderLess = $20
-#PB_String_LowerCase = $8
-#PB_String_Numeric = $10
-#PB_String_Password = $1
-#PB_String_ReadOnly = $2
-#PB_String_UpperCase = $4
 
 #PB_Text_Border = $4
 #PB_Text_Center = $2
@@ -575,12 +504,12 @@ IncludeFile "../Common.pb"
 #PB_Shortcut_Pad7 = 137
 #PB_Shortcut_Pad8 = 138
 #PB_Shortcut_Pad9 = 139
-#PB_Shortcut_Multiply  = 42
-#PB_Shortcut_Add       = 43
-#PB_Shortcut_Separator = 0
-#PB_Shortcut_Subtract  = 45
-#PB_Shortcut_Decimal   = 44
-#PB_Shortcut_Divide    = 47
+#PB_Shortcut_Multiply   = 140
+#PB_Shortcut_Add        = 141
+#PB_Shortcut_Separator  = 0
+#PB_Shortcut_Subtract   = 143
+#PB_Shortcut_Decimal    = 144
+#PB_Shortcut_Divide     = 145
 #PB_Shortcut_F1  = 122 + $100 ; KeyCode
 #PB_Shortcut_F2  = 120 + $100 ; KeyCode
 #PB_Shortcut_F3  = 99  + $100 ; KeyCode
@@ -609,3 +538,9 @@ IncludeFile "../Common.pb"
 #PB_Shortcut_Scroll = 0 ; Not supported on OS X
 
 #PB_Input_Eof = Chr(10)+"EOF"+Chr(10) ; it is a string, so unicode mode affects it
+
+; IDE Options = PureBasic 6.30 beta 3 (Windows - x64)
+; CursorPosition = 115
+; FirstLine = 106
+; EnableXP
+; EnableUnicode
