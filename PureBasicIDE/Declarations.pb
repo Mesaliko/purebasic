@@ -150,7 +150,7 @@ Declare.s GetContinuationLine(Index, *Offset.INTEGER = 0, *Source.SourceFile = 0
 Declare SetLine(Index, NewLine$)                                                               ; replace the indexed line with the given text (and highlight it again)
 Declare CreateEditorGadget()                                                                   ; create the editing gadget for this source (must call ChangeActiveSource() right after creating the gadget!)
 Declare SetReadOnly(Gadget, State)                                                             ; set the editing gadget to readonly
-Declare InsertCodeString(String$)                                                              ; insert given string at the current position (also converts to utf8 if needed)
+Declare InsertCodeString(String$, MoveCursor = #False)                                         ; insert given string at the current position (also converts to utf8 if needed)
 Declare Undo()                                                                                 ; perform the standard editior function
 Declare Redo()
 Declare Cut()
@@ -601,7 +601,7 @@ Declare ChangeActiveSourcecode(*OldSource.SourceFile = 0) ; change the active so
 Declare NewSource(FileName$, ExecuteTool)                 ; create a new source (with optional name to load a file in)
 Declare SaveProjectSettings(*Target.CompileTarget, IsCodeFile, IsTempFile, ReportErrors) ; save the settings of *ActiveSource (a file must be open in write mode!)
 Declare AnalyzeProjectSettings(*Source.SourceFile, *Buffer, Length, IsTempFile)          ; fill the *Source structure with the project settings from *Buffer. (return new project length)
-Declare LoadSourceFile(FileName$, Activate = 1)                                          ; load the given file into a new source (if not already open)
+Declare LoadSourceFile(FileName$, Activate = 1, AddToRecentFiles = 1)                    ; load the given file into a new source (if not already open)
 Declare SaveSourceFile(FileName$)                                                        ; save the current source to the given name
 Declare LoadTempFile(FileName$)                                                          ; load the specified file over the current opened source
 Declare SaveTempFile(FileName$)                                                          ; save the current source to a temp name (no change of modified/unmodified by this!)
