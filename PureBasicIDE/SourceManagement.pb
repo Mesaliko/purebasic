@@ -1712,7 +1712,7 @@ Procedure FindSourceFile(FileName$)
   
 EndProcedure
 
-Procedure LoadSourceFile(FileName$, Activate = 1)
+Procedure LoadSourceFile(FileName$, Activate = 1, AddToRecentFiles = 1)
   success = 0
   
   ; Check if this is a project file
@@ -1735,11 +1735,17 @@ Procedure LoadSourceFile(FileName$, Activate = 1)
   ; Check if this is a form (file extension only for now)
   ; NOTE: it needs to be after the already opened check !
   If LCase(GetExtensionPart(FileName$)) = "pbf"
+    
+    If FD_VersionCheck(FileName$) = #PB_MessageRequester_No
+      ProcedureReturn 0
+    EndIf
+
     OpenForm(FileName$)
     RecentFiles_AddFile(FileName$, #False)
     AddTools_Execute(#TRIGGER_SourceLoad, *ActiveSource)
     LinkSourceToProject(*ActiveSource) ; Link To project (If any)
     ProcedureReturn 1
+    
   EndIf
   
   ; reset the current source
@@ -1840,7 +1846,9 @@ Procedure LoadSourceFile(FileName$, Activate = 1)
         *ActiveSource\DiskChecksum  = FileFingerprint(*ActiveSource\Filename$, #PB_Cipher_MD5)
       EnableDebugger
       
-      RecentFiles_AddFile(FileName$, #False)
+      If AddToRecentFiles
+        RecentFiles_AddFile(FileName$, #False)
+      EndIf
       AddTools_Execute(#TRIGGER_SourceLoad, *ActiveSource)
       FullSourceScan(*ActiveSource)
       UpdateFolding(*ActiveSource, 0, -1)

@@ -6,16 +6,21 @@
 UseJPEGImageDecoder()
 UsePNGImageDecoder()
 
-Global P_WinHeight, P_Status, P_Menu, P_Font.s, P_FontSize, P_FontSizeL
+Global P_WinHeight, P_Status, P_Menu, P_Toolbar, P_Font.s, P_FontSize, P_FontSizeL
 Global P_FontGadget.s, P_FontGadgetSize, P_FontMenu.s, P_FontMenuSize, P_FontColumn.s, P_FontColumnSize, P_FontGrid.s
 Global P_SplitterWidth, ScrollAreaW, Panel_Height, P_ScrollWidth
 
 Global multiselectStart, multiselectParent, multiselectFirstScan
 
+Global grid_color_bg.l, grid_color_fg.l, grid_color_text.l, grid_color_light.l, grid_color_mid.l, grid_color_dark.l
+
 #Page_Padding = 10
 
 CompilerSelect #PB_Compiler_OS
   CompilerCase #PB_OS_MacOS
+    
+    Declare GetCocoaColor(NSColorName.s)
+    
     P_FontGrid = "Lucida Grande"
     #P_FontGridSize = 13
     #P_FontCode = "Monaco"
@@ -31,8 +36,8 @@ CompilerSelect #PB_Compiler_OS
     #P_FontCode = "Courier New"
     #P_FontCodeSize = 11
   CompilerCase #PB_OS_Linux
-    P_FontGrid = "Lucida Grande"
-    #P_FontGridSize = 11
+    P_FontGrid = "DejaVu Sans"
+    #P_FontGridSize = 10
     #P_FontCode = "Monaco"
     #P_FontCodeSize = 11
 CompilerEndSelect
@@ -355,6 +360,14 @@ Declare FD_DuplicateGadget()
 Declare FD_Open(file.s,update = 0)
 Declare FD_PrepareTestCode(compile = 1)
 
+; Version Warnings Preference Items
+EnumerationBinary 
+  #FDI_Warn_NotRecognized
+  #FDI_Warn_DowngradeAlways
+  #FDI_Warn_UpgradeBreaking
+  #FDI_Warn_UpgradeAlways 
+EndEnumeration
+#FDI_Warn_Default = #FDI_Warn_NotRecognized | #FDI_Warn_DowngradeAlways | #FDI_Warn_UpgradeBreaking
 
 ; Gadget Types
 Enumeration
@@ -531,6 +544,10 @@ AddElement(Gadgets()\Flags()) : Gadgets()\Flags()\name = "#PB_Window_NoGadgets"
 Gadgets()\Flags()\value = #PB_Window_NoGadgets : Gadgets()\Flags()\ivalue = #FDI_Window_NoGadgets
 AddElement(Gadgets()\Flags()) : Gadgets()\Flags()\name = "#PB_Window_NoActivate"
 Gadgets()\Flags()\value = #PB_Window_NoActivate : Gadgets()\Flags()\ivalue = #FDI_Window_NoActivate
+AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_Event_Menu"
+AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_Event_Gadget"
+AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_Event_SysTray"
+AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_Event_Timer"
 AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_Event_CloseWindow"
 AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_Event_Repaint"
 AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_Event_SizeWindow"
@@ -539,12 +556,12 @@ AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_Event_MinimizeWi
 AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_Event_MaximizeWindow"
 AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_Event_RestoreWindow"
 AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_Event_ActivateWindow"
+AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_Event_DeactivateWindow"
 AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_Event_WindowDrop"
-AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_Event_Menu"
-AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_Event_Gadget"
-AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_Event_SysTray"
-AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_Event_Timer"
 AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_Event_GadgetDrop"
+AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_Event_RightClick"
+AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_Event_LeftClick"
+AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_Event_LeftDoubleClick"
 
 ;- B
 EnumerationBinary
@@ -595,6 +612,7 @@ EnumerationBinary
   #FDI_Canvas_Keyboard
   #FDI_Canvas_DrawFocus
 EndEnumeration
+; TODO #PB_Canvas_Container is missing.
 
 AddElement(Gadgets()) : Gadgets()\type = #Form_Type_Canvas
 Gadgets()\node = 1
@@ -618,6 +636,7 @@ AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_LeftCl
 AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_LeftDoubleClick"
 AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_RightButtonDown"
 AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_RightButtonUp"
+AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_RightClick" 
 AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_RightDoubleClick"
 AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_MiddleButtonDown"
 AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_MiddleButtonUp"
@@ -626,6 +645,7 @@ AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_LostFo
 AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_KeyDown"
 AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_KeyUp"
 AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_Input"
+AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_Resize"
 
 EnumerationBinary
   #FDI_CheckBox_Right
@@ -664,8 +684,8 @@ Gadgets()\Flags()\value = #PB_ComboBox_UpperCase : Gadgets()\Flags()\ivalue = #F
 AddElement(Gadgets()\Flags()) : Gadgets()\Flags()\name = "#PB_ComboBox_Image"
 Gadgets()\Flags()\value = #PB_ComboBox_Image : Gadgets()\Flags()\ivalue = #FDI_ComboBox_Image
 AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_Change"
-AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_LostFocus"
 AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_Focus"
+AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_LostFocus"
 
 EnumerationBinary
   #FDI_Container_BorderLess
@@ -689,6 +709,7 @@ AddElement(Gadgets()\Flags()) : Gadgets()\Flags()\name = "#PB_Container_Single"
 Gadgets()\Flags()\value = #PB_Container_Single : Gadgets()\Flags()\ivalue = #FDI_Container_Single
 AddElement(Gadgets()\Flags()) : Gadgets()\Flags()\name = "#PB_Container_Double"
 Gadgets()\Flags()\value = #PB_Container_Double : Gadgets()\Flags()\ivalue = #FDI_Container_Double
+AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_Resize"
 
 ; AddElement(Gadgets()) : Gadgets()\type = #Form_Type_Custom
 ; Gadgets()\node = 2
@@ -709,11 +730,13 @@ AddElement(Gadgets()\Flags()) : Gadgets()\Flags()\name = "#PB_Date_UpDown"
 Gadgets()\Flags()\value = #PB_Date_UpDown : Gadgets()\Flags()\ivalue = #FDI_Date_UpDown
 AddElement(Gadgets()\Flags()) : Gadgets()\Flags()\name = "#PB_Date_CheckBox"
 Gadgets()\Flags()\value = #PB_Date_CheckBox : Gadgets()\Flags()\ivalue = #FDI_Date_CheckBox
+AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_Change"
 
 ;- E
 EnumerationBinary
   #FDI_Editor_ReadOnly
   #FDI_Editor_WordWrap
+  #FDI_Editor_TabNavigation
 EndEnumeration
 
 AddElement(Gadgets()) : Gadgets()\type = #Form_Type_Editor
@@ -724,6 +747,11 @@ AddElement(Gadgets()\Flags()) : Gadgets()\Flags()\name = "#PB_Editor_ReadOnly"
 Gadgets()\Flags()\value = #PB_Editor_ReadOnly : Gadgets()\Flags()\ivalue = #FDI_Editor_ReadOnly
 AddElement(Gadgets()\Flags()) : Gadgets()\Flags()\name = "#PB_Editor_WordWrap"
 Gadgets()\Flags()\value = #PB_Editor_WordWrap : Gadgets()\Flags()\ivalue = #FDI_Editor_WordWrap
+AddElement(Gadgets()\Flags()) : Gadgets()\Flags()\name = "#PB_Editor_TabNavigation"
+Gadgets()\Flags()\value = #PB_Editor_TabNavigation : Gadgets()\Flags()\ivalue = #FDI_Editor_TabNavigation
+AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_Change"
+AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_Focus"
+AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_LostFocus"
 
 EnumerationBinary
   #FDI_Explorer_AlwaysShowSelection
@@ -744,6 +772,7 @@ EnumerationBinary
   #FDI_Explorer_NoMyDocuments
   #FDI_Explorer_NoParentFolder
   #FDI_Explorer_NoSort
+  #FDI_Explorer_HiddenFiles
 EndEnumeration
 
 AddElement(Gadgets()) : Gadgets()\type = #Form_Type_ExplorerCombo
@@ -789,6 +818,15 @@ AddElement(Gadgets()\Flags()) : Gadgets()\Flags()\name = "#PB_Explorer_NoSort"
 Gadgets()\Flags()\value = #PB_Explorer_NoSort : Gadgets()\Flags()\ivalue = #FDI_Explorer_NoSort
 AddElement(Gadgets()\Flags()) : Gadgets()\Flags()\name = "#PB_Explorer_AutoSort"
 Gadgets()\Flags()\value = #PB_Explorer_AutoSort : Gadgets()\Flags()\ivalue = #FDI_Explorer_AutoSort
+AddElement(Gadgets()\Flags()) : Gadgets()\Flags()\name = "#PB_Explorer_AutoSort"
+Gadgets()\Flags()\value = #PB_Explorer_HiddenFiles : Gadgets()\Flags()\ivalue = #FDI_Explorer_HiddenFiles
+AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_Change"
+AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_LeftClick"
+AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_RightClick"
+AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_LeftDoubleClick"
+AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_RightDoubleClick "
+AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_DragStart"
+AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_Refresh"
 
 AddElement(Gadgets()) : Gadgets()\type = #Form_Type_ExplorerTree
 Gadgets()\node = 1
@@ -810,12 +848,12 @@ AddElement(Gadgets()\Flags()) : Gadgets()\Flags()\name = "#PB_Explorer_NoMyDocum
 Gadgets()\Flags()\value = #PB_Explorer_NoMyDocuments : Gadgets()\Flags()\ivalue = #FDI_Explorer_NoMyDocuments
 AddElement(Gadgets()\Flags()) : Gadgets()\Flags()\name = "#PB_Explorer_AutoSort"
 Gadgets()\Flags()\value = #PB_Explorer_AutoSort : Gadgets()\Flags()\ivalue = #FDI_Explorer_AutoSort
+AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_Change"
 AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_LeftClick"
 AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_RightClick"
 AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_LeftDoubleClick"
 AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_RightDoubleClick"
 AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_DragStart"
-AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_Change"
 
 ;- F
 EnumerationBinary
@@ -853,6 +891,7 @@ Gadgets()\Flags()\value = #PB_HyperLink_Underline : Gadgets()\Flags()\ivalue = #
 ;- I
 EnumerationBinary
   #FDI_Image_Border
+  #FDI_Image_Raised
 EndEnumeration
 
 AddElement(Gadgets()) : Gadgets()\type = #Form_Type_Img
@@ -861,6 +900,8 @@ Gadgets()\name = "Image"
 Gadgets()\icon = #IMAGE_FormIcons_Image
 AddElement(Gadgets()\Flags()) : Gadgets()\Flags()\name = "#PB_Image_Border"
 Gadgets()\Flags()\value = #PB_Image_Border : Gadgets()\Flags()\ivalue = #FDI_Image_Border
+AddElement(Gadgets()\Flags()) : Gadgets()\Flags()\name = "#PB_Image_Border"
+Gadgets()\Flags()\value = #PB_Image_Raised : Gadgets()\Flags()\ivalue = #FDI_Image_Raised
 AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_LeftClick"
 AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_RightClick"
 AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_LeftDoubleClick"
@@ -932,10 +973,21 @@ AddElement(Gadgets()\Flags()) : Gadgets()\Flags()\name = "#PB_ListView_ClickSele
 Gadgets()\Flags()\value = #PB_ListView_ClickSelect : Gadgets()\Flags()\ivalue = #FDI_ListView_ClickSelect
 AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_LeftClick"
 AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_LeftDoubleClick"
+AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_RightClick"
 
 ;- O
 EnumerationBinary
   #FDI_OpenGL_Keyboard
+  #FDI_OpenGL_NoFlipSynchronization
+  #FDI_OpenGL_FlipSynchronization
+  #FDI_OpenGL_NoDepthBuffer
+  #FDI_OpenGL_16BitDepthBuffer
+  #FDI_OpenGL_24BitDepthBuffer
+  #FDI_OpenGL_NoStencilBuffer
+  #FDI_OpenGL_8BitStencilBuffer
+  #FDI_OpenGL_NoAccumulationBuffer
+  #FDI_OpenGL_32BitAccumulationBuffer
+  #FDI_OpenGL_64BitAccumulationBuffer
 EndEnumeration
 
 AddElement(Gadgets()) : Gadgets()\type = #Form_Type_OpenGL
@@ -944,6 +996,45 @@ Gadgets()\icon = #IMAGE_FormIcons_Container
 Gadgets()\name = "OpenGL"
 AddElement(Gadgets()\Flags()) : Gadgets()\Flags()\name = "#PB_OpenGL_Keyboard"
 Gadgets()\Flags()\value = #PB_OpenGL_Keyboard : Gadgets()\Flags()\ivalue = #FDI_OpenGL_Keyboard
+AddElement(Gadgets()\Flags()) : Gadgets()\Flags()\name = "#PB_OpenGL_NoFlipSynchronization"
+Gadgets()\Flags()\value = #PB_OpenGL_NoFlipSynchronization : Gadgets()\Flags()\ivalue = #FDI_OpenGL_NoFlipSynchronization
+AddElement(Gadgets()\Flags()) : Gadgets()\Flags()\name = "#PB_OpenGL_FlipSynchronization"
+Gadgets()\Flags()\value = #PB_OpenGL_FlipSynchronization : Gadgets()\Flags()\ivalue = #FDI_OpenGL_FlipSynchronization
+AddElement(Gadgets()\Flags()) : Gadgets()\Flags()\name = "#PB_OpenGL_NoDepthBuffer"
+Gadgets()\Flags()\value = #PB_OpenGL_NoDepthBuffer : Gadgets()\Flags()\ivalue = #FDI_OpenGL_NoDepthBuffer
+AddElement(Gadgets()\Flags()) : Gadgets()\Flags()\name = "#PB_OpenGL_16BitDepthBuffer"
+Gadgets()\Flags()\value = #PB_OpenGL_16BitDepthBuffer : Gadgets()\Flags()\ivalue = #FDI_OpenGL_16BitDepthBuffer
+AddElement(Gadgets()\Flags()) : Gadgets()\Flags()\name = "#PB_OpenGL_24BitDepthBuffer"
+Gadgets()\Flags()\value = #PB_OpenGL_24BitDepthBuffer : Gadgets()\Flags()\ivalue = #FDI_OpenGL_24BitDepthBuffer
+AddElement(Gadgets()\Flags()) : Gadgets()\Flags()\name = "#PB_OpenGL_NoStencilBuffer"
+Gadgets()\Flags()\value = #PB_OpenGL_NoStencilBuffer : Gadgets()\Flags()\ivalue = #FDI_OpenGL_NoStencilBuffer
+AddElement(Gadgets()\Flags()) : Gadgets()\Flags()\name = "#PB_OpenGL_8BitStencilBuffer"
+Gadgets()\Flags()\value = #PB_OpenGL_8BitStencilBuffer : Gadgets()\Flags()\ivalue = #FDI_OpenGL_8BitStencilBuffer
+AddElement(Gadgets()\Flags()) : Gadgets()\Flags()\name = "#PB_OpenGL_NoAccumulationBuffer"
+Gadgets()\Flags()\value = #PB_OpenGL_NoAccumulationBuffer : Gadgets()\Flags()\ivalue = #FDI_OpenGL_NoAccumulationBuffer
+AddElement(Gadgets()\Flags()) : Gadgets()\Flags()\name = "#PB_OpenGL_32BitAccumulationBuffer"
+Gadgets()\Flags()\value = #PB_OpenGL_32BitAccumulationBuffer : Gadgets()\Flags()\ivalue = #FDI_OpenGL_32BitAccumulationBuffer
+AddElement(Gadgets()\Flags()) : Gadgets()\Flags()\name = "#PB_OpenGL_64BitAccumulationBuffer"
+Gadgets()\Flags()\value = #PB_OpenGL_64BitAccumulationBuffer : Gadgets()\Flags()\ivalue = #FDI_OpenGL_64BitAccumulationBuffer
+AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_MouseEnter"
+AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_MouseLeave"
+AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_MouseMove"
+AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_MouseWheel"
+AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_LeftButtonDown"
+AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_LeftButtonUp"
+AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_LeftClick"
+AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_LeftDoubleClick"
+AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_RightButtonDown"
+AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_RightButtonUp"
+AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_RightClick" 
+AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_RightDoubleClick"
+AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_MiddleButtonDown"
+AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_MiddleButtonUp"
+AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_Focus"
+AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_LostFocus"
+AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_KeyDown"
+AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_KeyUp"
+AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_Input"
 
 AddElement(Gadgets()) : Gadgets()\type = #Form_Type_Option
 Gadgets()\node = 1
@@ -955,6 +1046,8 @@ AddElement(Gadgets()) : Gadgets()\type = #Form_Type_Panel
 Gadgets()\node = 2
 Gadgets()\name = "Panel"
 Gadgets()\icon = #IMAGE_FormIcons_Panel
+AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_Change"
+AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_Resize"
 
 EnumerationBinary
   #FDI_ProgressBar_Smooth
@@ -975,6 +1068,7 @@ AddElement(Gadgets()) : Gadgets()\type = #Form_Type_Scintilla
 Gadgets()\node = 1
 Gadgets()\name = "Scintilla"
 Gadgets()\icon = #IMAGE_FormIcons_Editor
+AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_RightClick" 
 
 EnumerationBinary
   #FDI_ScrollArea_Flat
@@ -998,6 +1092,7 @@ AddElement(Gadgets()\Flags()) : Gadgets()\Flags()\name = "#PB_ScrollArea_BorderL
 Gadgets()\Flags()\value = #PB_ScrollArea_BorderLess : Gadgets()\Flags()\ivalue = #FDI_ScrollArea_BorderLess
 AddElement(Gadgets()\Flags()) : Gadgets()\Flags()\name = "#PB_ScrollArea_Center"
 Gadgets()\Flags()\value = #PB_ScrollArea_Center : Gadgets()\Flags()\ivalue = #FDI_ScrollArea_Center
+AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_Resize"
 
 EnumerationBinary
   #FDI_ScrollBar_Vertical
@@ -1024,7 +1119,9 @@ Gadgets()\Flags()\value = #PB_Spin_ReadOnly : Gadgets()\Flags()\ivalue = #FDI_Sp
 AddElement(Gadgets()\Flags()) : Gadgets()\Flags()\name = "#PB_Spin_Numeric"
 Gadgets()\Flags()\value = #PB_Spin_Numeric : Gadgets()\Flags()\ivalue = #FDI_Spin_Numeric
 AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_Change"
-
+AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_Up"
+AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_Down"
+  
 EnumerationBinary
   #FDI_Splitter_Vertical
   #FDI_Splitter_Separator
@@ -1071,8 +1168,8 @@ Gadgets()\Flags()\value = #PB_String_UpperCase : Gadgets()\Flags()\ivalue = #FDI
 AddElement(Gadgets()\Flags()) : Gadgets()\Flags()\name = "#PB_String_BorderLess"
 Gadgets()\Flags()\value = #PB_String_BorderLess : Gadgets()\Flags()\ivalue = #FDI_String_BorderLess
 AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_Change"
-AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_LostFocus"
 AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_Focus"
+AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_LostFocus"
 
 ;- T
 EnumerationBinary
@@ -1128,6 +1225,12 @@ AddElement(Gadgets()\Flags()) : Gadgets()\Flags()\name = "#PB_Tree_CheckBoxes"
 Gadgets()\Flags()\value = #PB_Tree_CheckBoxes : Gadgets()\Flags()\ivalue = #FDI_Tree_CheckBoxes
 AddElement(Gadgets()\Flags()) : Gadgets()\Flags()\name = "#PB_Tree_ThreeState"
 Gadgets()\Flags()\value = #PB_Tree_ThreeState : Gadgets()\Flags()\ivalue = #FDI_Tree_ThreeState
+AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_LeftClick"
+AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_LeftDoubleClick"
+AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_RightClick"
+AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_RightDoubleClick"
+AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_Change"
+AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_DragStart"
 
 ;- W
 EnumerationBinary
@@ -1140,6 +1243,13 @@ Gadgets()\name = "Web"
 Gadgets()\icon = #IMAGE_FormIcons_Web
 AddElement(Gadgets()\Flags()) : Gadgets()\Flags()\name = "#PB_Web_Edge"
 Gadgets()\Flags()\value = #PB_Web_Edge : Gadgets()\Flags()\ivalue = #FDI_Web_Edge
+AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_TitleChange"
+AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_StatusChange"
+AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_DownloadStart"
+AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_DownloadProgress"
+AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_DownloadEnd"
+AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_PopupWindow"
+AddElement(Gadgets()\Events()) : Gadgets()\Events()\name = "#PB_EventType_PopupMenu"
 
 EnumerationBinary
   #FDI_WebView_Debug
@@ -1211,6 +1321,7 @@ Procedure InitVars()
       P_WinHeight = 22
       P_Status = 24
       P_Menu = 23
+      P_Toolbar = 36
       P_Font.s = "Lucida Grande"
       P_FontSize = 9
       P_FontSizeL = 10
@@ -1244,6 +1355,7 @@ Procedure InitVars()
       P_WinHeight = 29
       P_Status = 23
       P_Menu = 22
+      P_Toolbar = 24
       P_FontSize = 9
       P_FontSizeL = 10
       P_FontGadgetSize = 9
@@ -1256,17 +1368,18 @@ Procedure InitVars()
       Panel_Height = 22
     Case #PB_OS_Linux
       P_WinHeight = 28
-      P_Status = 23
-      P_Menu = 22
-      P_Font.s = "Lucida Grande"
-      P_FontSize = 10
+      P_Status = 26
+      P_Menu = 28
+      P_Toolbar = 38
+      P_Font.s = "DejaVu Sans"
+      P_FontSize = 9
       P_FontSizeL = 11
-      P_FontGadget.s = "Lucida Grande"
-      P_FontGadgetSize = 11
-      P_FontMenu.s = "Lucida Grande"
-      P_FontMenuSize = 12
-      P_FontColumn.s = "Lucida Grande"
-      P_FontColumnSize = 9
+      P_FontGadget.s = "DejaVu Sans"
+      P_FontGadgetSize = 9
+      P_FontMenu.s = "DejaVu Sans"
+      P_FontMenuSize = 11
+      P_FontColumn.s = "DejaVu Sans"
+      P_FontColumnSize = 11
       P_SplitterWidth = 9
       P_ScrollWidth = 18
 
@@ -1281,8 +1394,34 @@ Procedure InitVars()
     P_FontMenuSize + 3
     P_FontColumnSize + 3
   CompilerEndIf
-
-
+  
+  CompilerIf #CompileMac
+    If DisplayDarkMode
+      grid_color_bg = GetCocoaColor("underPageBackgroundColor")
+      grid_color_text = GetCocoaColor("textColor")
+      grid_color_light = GetCocoaColor("windowBackgroundColor")
+      grid_color_mid = #Gray
+    Else
+      grid_color_bg = RGB(238, 238, 238)
+      grid_color_text = #Black
+      grid_color_light = #Gray; RGB(238, 238, 238)
+      grid_color_mid = #Gray
+    EndIf
+  CompilerElse
+    CompilerIf #CompileLinuxGtk
+      Global *Style.GtkStyle = gtk_widget_get_style_(WindowID(#WINDOW_Main))
+      grid_color_bg = RGB(*Style\bg[#GTK_STATE_NORMAL]\red >> 8, *Style\bg[#GTK_STATE_NORMAL]\green >> 8, *Style\bg[#GTK_STATE_NORMAL]\blue >> 8)
+      grid_color_text = RGB(*Style\text[#GTK_STATE_NORMAL]\red >> 8, *Style\text[#GTK_STATE_NORMAL]\green >> 8, *Style\text[#GTK_STATE_NORMAL]\blue >> 8)
+      grid_color_light = RGB(*Style\light[#GTK_STATE_NORMAL]\red >> 8, *Style\light[#GTK_STATE_NORMAL]\green >> 8, *Style\light[#GTK_STATE_NORMAL]\blue >> 8)
+      grid_color_mid = RGB(*Style\mid[#GTK_STATE_NORMAL]\red >> 8, *Style\mid[#GTK_STATE_NORMAL]\green >> 8, *Style\mid[#GTK_STATE_NORMAL]\blue >> 8)
+    CompilerElse
+      grid_color_bg = RGB(238, 238, 238)
+      grid_color_text = #Black
+      grid_color_light = #Gray; RGB(238, 238, 238)
+      grid_color_mid = #Gray
+    CompilerEndIf
+  CompilerEndIf
+  
   If IsFont(#Form_Font) : FreeFont(#Form_Font) : EndIf
   If IsFont(#Form_FontColumnHeader) : FreeFont(#Form_FontColumnHeader) : EndIf
   If IsFont(#Form_FontMenu) : FreeFont(#Form_FontMenu) : EndIf
